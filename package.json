@@ -1,0 +1,23 @@
+{
+  "name": "skill-sample-nodejs-calendar-reader",
+  "version": "1.0.0",
+  "description": "A simple calendar reading skill.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "alexa",
+    "skill",
+    "fact"
+  ],
+  "author": "Amazon.com",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "alexa-sdk": "^1.0.6",
+    "dotenv": "^2.0.0",
+    "dynamodb": "^0.3.6",
+    "kraft-recipe-api": "^0.1.2",
+    "moment-interval": "^0.2.1"
+  }
+}
