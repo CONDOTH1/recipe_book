@@ -9,8 +9,7 @@ var ddb = require('dynamodb').ddb({
 );
 var defaultRecipeID = 138284;
 var states = {
-  SEARCHMODE: '_SEARCHMODE',
-  NEWMODE: '_NEWMODE'
+  SEARCHMODE: '_SEARCHMODE'
 };
 
 var alexa;
@@ -32,9 +31,6 @@ var output = "";
 var pickInAppMessage = "OK, to continue please download the recipe book application to pick a recipe for today.";
 
 var newSessionHandlers = {
-  'NewSession': function () {
-    this.emit('LaunchRequest');
-  },
   'AMAZON.YesIntent': function () {
     var handler = this;
     getRecipes(defaultRecipeID, handler);
@@ -57,32 +53,13 @@ var newSessionHandlers = {
   }
 };
 
-
-
-
-var renewSessionHandlers = Alexa.CreateStateHandler(states.NEWMODE, {
-  'LaunchRequest': function () {
-    var handler = this;
-    var userId = this.event.session.user.userId;
-    ddb.getItem('Recipe_Book_Recipes', userId, null, {}, function (err, response) {
-      var today = new Date();
-      if (!response || !response[today.toDateString()]) {
-        alexa.emit(':tell', noRecipeMessage);
-      } else {
-        var recipeID = response[today.toDateString()];
-        getRecipes(recipeID, handler);
-      }
-    });
-  }
-});
-
 var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
   'AMAZON.YesIntent': function () {
     alexa.emit(':ask', endHelpMessage, repromptMessage);
   },
 
   'AMAZON.NoIntent': function () {
-    this.handler.state = states.NEWMODE;
+    this.attributes.ingredients = [];
     this.attributes.recipe = {};
     this.attributes.step = 0;
     this.attributes.timers = {};
@@ -185,6 +162,15 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
     this.emit('AMAZON.StopIntent');
   },
 
+  'NewSession': function() {
+     if (this.attributes.recipe["recipe"]) {
+       this.emit(':ask', WelcomeBackMessage)
+     } else {
+       var handler = this;
+       this.emit('LaunchRequest');
+     }
+   },
+
   'Unhandled': function () {
     this.emit(':ask', WelcomeBackMessage, repromptMessage);
   }
@@ -194,7 +180,7 @@ exports.handler = function (event, context) {
   alexa = Alexa.handler(event, context);
   alexa.AppId = APP_ID;
   alexa.dynamoDBTableName = "Recipe_Book_Sessions";
-  alexa.registerHandlers(newSessionHandlers, startSearchHandlers, renewSessionHandlers);
+  alexa.registerHandlers(newSessionHandlers, startSearchHandlers);
   alexa.execute();
 };
 // ======== HELPER FUNCTIONS ==============
