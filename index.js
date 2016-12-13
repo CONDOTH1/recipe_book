@@ -24,14 +24,22 @@ var endOfRecipe = "Well done, you've finished cooking. Do you want to go back ov
 var endHelpMessage = "You can ask for the current step, previous step, or go to a step of your choice.";
 var timerStartMessage = "The timer has started";
 var WelcomeBackMessage = "Welcome Back.";
-var noRecipeMessage = "You have not picked a recipe for today. Please choose one in the Recipe Book App.";
+var noRecipeMessage = "You have not picked a recipe for today. Would you like to explore an example recipe?";
 var chooseNewStep = "That step doesn't exist, please choose another!";
-var reprompt = "Sorry, I didn't understand that. How can I help you?";
+var repromptMessage = "Sorry, I didn't understand that. How can I help you?";
 var output = "";
 
 var newSessionHandlers = {
   'NewSession': function () {
     this.emit('LaunchRequest');
+  },
+  'AMAZON.YesIntent': function () {
+    var handler = this;
+    var recipeID = 138284;
+    getRecipes(recipeID, handler);
+  },
+  'AMAZON.NoIntent': function () {
+    this.emit(':tell', 'Pick One');
   },
   'LaunchRequest': function () {
     var handler = this;
@@ -39,14 +47,15 @@ var newSessionHandlers = {
     ddb.getItem('Recipe_Book_Recipes', userId, null, {}, function (err, response) {
       var today = new Date();
       if (!response || !response[today.toDateString()]) {
-        alexa.emit(':tell', noRecipeMessage);
+        alexa.emit(':ask', noRecipeMessage, repromptMessage);
       } else {
         var recipeID = response[today.toDateString()];
         getRecipes(recipeID, handler);
       }
     });
-  },
+  }
 };
+
 
 
 
@@ -68,7 +77,7 @@ var renewSessionHandlers = Alexa.CreateStateHandler(states.NEWMODE, {
 
 var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
   'AMAZON.YesIntent': function () {
-    alexa.emit(':ask', endHelpMessage, reprompt);
+    alexa.emit(':ask', endHelpMessage, repromptMessage);
   },
 
   'AMAZON.NoIntent': function () {
@@ -88,13 +97,13 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
       this.attributes.step += 1;
       emitRecipeStep(this.attributes.step, this.attributes.recipe)
     } else {
-      this.emit(':ask', endOfRecipe, reprompt);
+      this.emit(':ask', endOfRecipe, repromptMessage);
     }
   },
 
   'getIngredientsIntent': function () {
     output = this.attributes.ingredients.join(", ");
-    this.emit(':ask', output, reprompt);
+    this.emit(':ask', output, repromptMessage);
   },
 
   'getSpecificIngredientIntent': function () {
@@ -106,7 +115,7 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
     if (output == undefined) {
       output = "Sorry I can't find that ingredient in the recipe"
     }
-    this.emit(':ask', output, reprompt);
+    this.emit(':ask', output, repromptMessage);
   },
 
   'currentStepIntent': function () {
@@ -121,11 +130,11 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
   'goToStepIntent': function () {
     var step = this.event.request.intent.slots.number.value - 1;
     if (step >= this.attributes.recipe["recipe"].length) {
-      this.emit(':ask', chooseNewStep, reprompt)
+      this.emit(':ask', chooseNewStep, repromptMessage)
     } else {
       this.attributes.step = step;
       output = this.attributes.recipe["recipe"][this.attributes.step];
-      this.emit(':ask', output, reprompt);
+      this.emit(':ask', output, repromptMessage);
     }
   },
 
@@ -134,7 +143,7 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
     var timerName = this.event.request.intent.slots.description.value;
     var endDate = moment().interval('/' + duration);
     this.attributes.timers[timerName] = endDate.end()._d.toString();
-    this.emit(':ask', timerStartMessage, reprompt);
+    this.emit(':ask', timerStartMessage, repromptMessage);
   },
 
   'timeLeftIntent': function () {
@@ -145,12 +154,12 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
       var timeLeft = getTimeLeft(this.attributes.timers[timerName]);
       output = makeTimeString(timeLeft) + timerName;
     }
-    this.emit(':ask', output, reprompt);
+    this.emit(':ask', output, repromptMessage);
   },
 
   'AMAZON.HelpIntent': function () {
     output = HelpMessage;
-    this.emit(':ask', output, reprompt);
+    this.emit(':ask', output, repromptMessage);
   },
 
   'AMAZON.StopIntent': function () {
@@ -166,7 +175,7 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
   },
 
   'Unhandled': function () {
-    this.emit(':ask', WelcomeBackMessage, HelpMessage);
+    this.emit(':ask', WelcomeBackMessage, repromptMessage);
   }
 });
 
