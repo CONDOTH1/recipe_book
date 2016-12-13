@@ -7,6 +7,7 @@ var ddb = require('dynamodb').ddb({
     endpoint: 'dynamodb.eu-west-1.amazonaws.com'
   }
 );
+var defaultRecipeID = 138284;
 var states = {
   SEARCHMODE: '_SEARCHMODE',
   NEWMODE: '_NEWMODE'
@@ -28,6 +29,7 @@ var noRecipeMessage = "You have not picked a recipe for today. Would you like to
 var chooseNewStep = "That step doesn't exist, please choose another!";
 var repromptMessage = "Sorry, I didn't understand that. How can I help you?";
 var output = "";
+var pickInAppMessage = "OK, to continue please download the recipe book application to pick a recipe for today.";
 
 var newSessionHandlers = {
   'NewSession': function () {
@@ -35,11 +37,10 @@ var newSessionHandlers = {
   },
   'AMAZON.YesIntent': function () {
     var handler = this;
-    var recipeID = 138284;
-    getRecipes(recipeID, handler);
+    getRecipes(defaultRecipeID, handler);
   },
   'AMAZON.NoIntent': function () {
-    this.emit(':tell', 'Pick One');
+    this.emit(':tell', pickInAppMessage);
   },
   'LaunchRequest': function () {
     var handler = this;
