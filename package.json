@@ -15,7 +15,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "alexa-sdk": "^1.0.6",
-    "dotenv": "^2.0.0",
     "dynamodb": "^0.3.6",
     "kraft-recipe-api": "^0.1.2",
     "moment-interval": "^0.2.1"

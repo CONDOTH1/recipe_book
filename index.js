@@ -1,11 +1,10 @@
 var Alexa = require('alexa-sdk');
-require('dotenv').config();
 var recipes = require("kraft-recipe-api");
 var moment = require('moment-interval');
-var ddb = require('dynamodb').ddb({ accessKeyId: process.env.ACCESSKEYID,
-                                    secretAccessKey: process.env.SECRETKEYID,
-                                    endpoint: 'dynamodb.eu-west-1.amazonaws.com'}
-                                  );
+var ddb = require('dynamodb').ddb({ accessKeyId: process.ENV.ACCESSKEYID,
+                                   secretAccessKey: process.ENV.SECRETKEYID,
+                                   endpoint: 'dynamodb.eu-west-1.amazonaws.com'}
+                                 );
 
 var states = {
     SEARCHMODE: '_SEARCHMODE',
@@ -13,7 +12,7 @@ var states = {
 };
 
 var alexa;
-var APP_ID = process.env.APPID;
+var APP_ID = process.ENV.APPID;
 var skillName = "Welcome to Recipe Book:";
 var welcomeMessage = "Today you've chosen to cook ";
 var welcomeTime = ". This dish should take approximately ";
@@ -142,8 +141,6 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
     },
 
     // unknown timer
-
-
 
     'AMAZON.HelpIntent': function () {
         output = HelpMessage;
