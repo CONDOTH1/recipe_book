@@ -49,6 +49,7 @@ var newSessionHandlers = {
 };
 
 
+
 var renewSessionHandlers = Alexa.CreateStateHandler(states.NEWMODE, {
   'LaunchRequest': function () {
     var handler = this;
@@ -66,13 +67,6 @@ var renewSessionHandlers = Alexa.CreateStateHandler(states.NEWMODE, {
 });
 
 var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
-  'NewSession': function () {
-    if (!!this.attributes.recipe) {
-      noRecipeHandler(this)
-    }
-  },
-
-
   'AMAZON.YesIntent': function () {
     alexa.emit(':ask', endHelpMessage, reprompt);
   },
