@@ -55,15 +55,25 @@ var newSessionHandlers = {
 
 var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
   'AMAZON.YesIntent': function () {
-    alexa.emit(':ask', endHelpMessage, repromptMessage);
+    if (this.attributes.recipe["recipe"]) {
+      alexa.emit(':ask', endHelpMessage, repromptMessage);
+    } else {
+      var handler = this;
+      getRecipes(defaultRecipeID, handler);
+    }
   },
 
   'AMAZON.NoIntent': function () {
-    this.attributes.ingredients = [];
-    this.attributes.recipe = {};
-    this.attributes.step = 0;
-    this.attributes.timers = {};
-    this.emit(':tell', shutdownMessage);
+    if (this.attributes.recipe["recipe"]) {
+      this.attributes.ingredients = [];
+      this.attributes.recipe = {};
+      this.attributes.step = 0;
+      this.attributes.timers = {};
+      this.emit(':tell', shutdownMessage);
+    } else {
+      this.emit(':tell', pickInAppMessage);
+    }
+
   },
 
   'AMAZON.RepeatIntent': function () {
@@ -266,10 +276,10 @@ function parseIngredients(result) {
   var IngredientList = result['IngredientDetails'];
   return IngredientList.map(function (element) {
     var quantityText = element.QuantityText.replace("-1/2", " and a half")
-    if (element.QuantityText == "1") {
+    if (element.QuantityText == "1" && element.QuantityUnit == '') {
       return quantityText + " " + element.QuantityUnit + " " + element.IngredientName;
     } else {
-      return quantityText + " " + element.QuantityUnit + "of " + element.IngredientName;
+      return quantityText + " " + element.QuantityUnit + " of " + element.IngredientName;
     }
   })
 }
