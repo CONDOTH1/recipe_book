@@ -123,6 +123,16 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
     emitRecipeStep(this.attributes.step, this.attributes.recipe)
   },
 
+  'firstStepIntent': function () {
+    this.attributes.step = 0;
+    emitRecipeStep(this.attributes.step, this.attributes.recipe)
+  },
+
+  'lastStepIntent': function () {
+    this.attributes.step = this.attributes.length - 1;
+    emitRecipeStep(this.attributes.step, this.attributes.recipe)
+  },
+
   'previousStepIntent': function () {
     this.attributes.step -= 1;
     emitRecipeStep(this.attributes.step, this.attributes.recipe)
